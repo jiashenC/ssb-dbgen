@@ -16,67 +16,63 @@
 #include <stdio.h>
 #include <math.h>
 #include "dss.h"
-#include "rnd.h" 
+#include "rnd.h"
 
 char *env_config PROTO((char *tag, char *dflt));
 void NthElement(long, long *);
 
-void
-dss_random(long *tgt, long lower, long upper, long stream)
+void dss_random(long *tgt, long lower, long upper, long stream)
 {
-	*tgt = UnifInt((long)lower, (long)upper, (long)stream);
-	Seed[stream].usage += 1;
+    *tgt = UnifInt((long)lower, (long)upper, (long)stream);
+    Seed[stream].usage += 1;
 
-	return;
+    return;
 }
 
-void
-row_start(int t)	\
+void row_start(int t)
 {
-	int i;
-	for (i=0; i <= MAX_STREAM; i++) 
-		Seed[i].usage = 0 ; 
-	
-	return;
+    int i;
+    for (i = 0; i <= MAX_STREAM; i++)
+        Seed[i].usage = 0;
+
+    return;
 }
 
-void
-row_stop(int t)	\
-	{ 
-	int i;
-	
-	/* need to allow for handling the master and detail together */
-	if (t == ORDER_LINE)
-		t = ORDER;
-	if (t == PART_PSUPP)
-		t = PART;
-	
-	for (i=0; i <= MAX_STREAM; i++)
-		if ((Seed[i].table == t) || (Seed[i].table == tdefs[t].child))
-			{ 
-			if (set_seeds && (Seed[i].usage > Seed[i].boundary))
-				{
-				fprintf(stderr, "\nSEED CHANGE: seed[%d].usage = %d\n", 
-					i, Seed[i].usage); 
-				Seed[i].boundary = Seed[i].usage;
-				} 
-			else 
-				{
-				NthElement((Seed[i].boundary - Seed[i].usage), &Seed[i].value);
-				}
-			} 
-		return;
-	}
-
-void
-dump_seeds(int tbl)
+void row_stop(int t)
 {
-	int i;
+    int i;
 
-	for (i=0; i <= MAX_STREAM; i++)
-		if (Seed[i].table == tbl)
-			printf("%d:\t%ld\n", i, Seed[i].value);
-	return;
+    /* need to allow for handling the master and detail together */
+    if (t == ORDER_LINE)
+        t = ORDER;
+    if (t == PART_PSUPP)
+        t = PART;
+
+    for (i = 0; i <= MAX_STREAM; i++)
+        if ((Seed[i].table == t) || (Seed[i].table == tdefs[t].child))
+        {
+            if (set_seeds && (Seed[i].usage > Seed[i].boundary))
+            {
+                fprintf(stderr, "\nSEED CHANGE: seed[%d].usage = %d\n",
+                        i, Seed[i].usage);
+                Seed[i].boundary = Seed[i].usage;
+            }
+            else
+            {
+                NthElement((Seed[i].boundary - Seed[i].usage), &Seed[i].value);
+            }
+        }
+    return;
+}
+
+void dump_seeds(int tbl)
+{
+    int i;
+
+    for (i = 0; i <= MAX_STREAM; i++)
+        if (Seed[i].table == tbl)
+            printf("%d:\t%ld\n", i, Seed[i].value);
+    return;
 }
 
 /******************************************************************
@@ -88,8 +84,7 @@ dump_seeds(int tbl)
 /*
  * long NextRand( long nSeed )
  */
-long
-NextRand(long nSeed)
+long NextRand(long nSeed)
 
 /*
  * nSeed is the previous random number; the returned value is the 
@@ -141,10 +136,10 @@ NextRand(long nSeed)
      * 0 and nM-1, so that's the answer.
      */
 
-    long            nU, nV;
+    long nU, nV;
 
     nU = nSeed / nQ;
-    nV = nSeed - nQ * nU;       /* i.e., nV = nSeed % nQ */
+    nV = nSeed - nQ * nU; /* i.e., nV = nSeed % nQ */
     nSeed = nA * nV - nU * nR;
     if (nSeed < 0)
         nSeed += nM;
@@ -160,8 +155,7 @@ NextRand(long nSeed)
 /*
  * long UnifInt( long nLow, long nHigh, long nStream )
  */
-long
-UnifInt(long nLow, long nHigh, long nStream)
+long UnifInt(long nLow, long nHigh, long nStream)
 
 /*
  * Returns an integer uniformly distributed between nLow and nHigh, 
@@ -170,8 +164,8 @@ UnifInt(long nLow, long nHigh, long nStream)
  */
 
 {
-    double          dRange;
-    long            nTemp;
+    double dRange;
+    long nTemp;
 
     if (nStream < 0 || nStream > MAX_STREAM)
         nStream = 0;
@@ -183,13 +177,11 @@ UnifInt(long nLow, long nHigh, long nStream)
         nHigh = nTemp;
     }
 
-    dRange = DOUBLE_CAST (nHigh - nLow + 1);
+    dRange = DOUBLE_CAST(nHigh - nLow + 1);
     Seed[nStream].value = NextRand(Seed[nStream].value);
-    nTemp = (long) (((double) Seed[nStream].value / dM) * (dRange));
+    nTemp = (long)(((double)Seed[nStream].value / dM) * (dRange));
     return (nLow + nTemp);
 }
-
-
 
 /******************************************************************
 
@@ -210,7 +202,7 @@ UnifReal(double dLow, double dHigh, long nStream)
  */
 
 {
-    double          dTemp;
+    double dTemp;
 
     if (nStream < 0 || nStream > MAX_STREAM)
         nStream = 0;
@@ -223,11 +215,9 @@ UnifReal(double dLow, double dHigh, long nStream)
         dHigh = dTemp;
     }
     Seed[nStream].value = NextRand(Seed[nStream].value);
-    dTemp = ((double) Seed[nStream].value / dM) * (dHigh - dLow);
+    dTemp = ((double)Seed[nStream].value / dM) * (dHigh - dLow);
     return (dLow + dTemp);
 }
-
-
 
 /******************************************************************%
 
@@ -249,7 +239,7 @@ Exponential(double dMean, long nStream)
  */
 
 {
-    double          dTemp;
+    double dTemp;
 
     if (nStream < 0 || nStream > MAX_STREAM)
         nStream = 0;
@@ -257,6 +247,6 @@ Exponential(double dMean, long nStream)
         return (0.0);
 
     Seed[nStream].value = NextRand(Seed[nStream].value);
-    dTemp = (double) Seed[nStream].value / dM;        /* unif between 0..1 */
+    dTemp = (double)Seed[nStream].value / dM; /* unif between 0..1 */
     return (-dMean * log(1.0 - dTemp));
 }
