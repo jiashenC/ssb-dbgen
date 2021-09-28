@@ -235,48 +235,66 @@ long mk_order(long index, order_t *o, long upd_num)
 	o->totalprice = 0;
 	ocnt = 0;
 
-	RANDOM(o->lines, O_LCNT_MIN, O_LCNT_MAX, O_LCNT_SD);
-	for (lcnt = 0; lcnt < o->lines; lcnt++)
+	// SSBMORG: number of items per order is random
+	// RANDOM(o->lines, O_LCNT_MIN, O_LCNT_MAX, O_LCNT_SD);
+	// skewed so 5 orders have 300003 items, other only 3 items
+	if (0 <= *(o->okey) && *(o->okey) < 5)
 	{
+		o->lines = 300003;
+	}
+	else
+	{
+		o->lines = 3;
+	}
+	o->skewed_lineorders = (lineorder_t*)malloc(sizeof(lineorder_t) * o->lines);
 
-		HUGE_SET(o->okey, o->lineorders[lcnt].okey);
-		o->lineorders[lcnt].linenumber = lcnt + 1;
-		o->lineorders[lcnt].custkey = o->custkey;
-		RANDOM(o->lineorders[lcnt].partkey, L_PKEY_MIN, L_PKEY_MAX, L_PKEY_SD);
-		RANDOM(o->lineorders[lcnt].suppkey, L_SKEY_MIN, L_SKEY_MAX, L_SKEY_SD);
-
-		RANDOM(o->lineorders[lcnt].quantity, L_QTY_MIN, L_QTY_MAX, L_QTY_SD);
-		RANDOM(o->lineorders[lcnt].discount, L_DCNT_MIN, L_DCNT_MAX, L_DCNT_SD);
-		RANDOM(o->lineorders[lcnt].tax, L_TAX_MIN, L_TAX_MAX, L_TAX_SD);
-
-		strcpy(o->lineorders[lcnt].orderdate, o->odate);
-
-		strcpy(o->lineorders[lcnt].opriority, o->opriority);
-		o->lineorders[lcnt].ship_priority = o->spriority;
-
-		RANDOM(c_date, L_CDTE_MIN, L_CDTE_MAX, L_CDTE_SD);
-		c_date += tmp_date;
-		strcpy(o->lineorders[lcnt].commit_date, asc_date[c_date - STARTDATE]);
-
-		pick_str(&l_smode_set, L_SMODE_SD, o->lineorders[lcnt].shipmode);
-
-		RPRICE_BRIDGE(rprice, o->lineorders[lcnt].partkey);
-		o->lineorders[lcnt].extended_price = rprice * o->lineorders[lcnt].quantity;
-		o->lineorders[lcnt].revenue = o->lineorders[lcnt].extended_price * ((long)100 - o->lineorders[lcnt].discount) / (long)PENNIES;
-
-		//round off problem with linux if use 0.6
-		o->lineorders[lcnt].supp_cost = 6 * rprice / 10;
-
-		o->totalprice +=
-			((o->lineorders[lcnt].extended_price *
-			  ((long)100 - o->lineorders[lcnt].discount)) /
-			 (long)PENNIES) *
-			((long)100 + o->lineorders[lcnt].tax) / (long)PENNIES;
+	// init 
+	for (lcnt = 0; lcnt < o->lines; lcnt++) {
+		o->skewed_lineorders[lcnt].okey = (DSS_HUGE*)malloc(sizeof(DSS_HUGE));
 	}
 
 	for (lcnt = 0; lcnt < o->lines; lcnt++)
 	{
-		o->lineorders[lcnt].order_totalprice = o->totalprice;
+
+		lineorder_t lo = o->skewed_lineorders[0];
+		HUGE_SET(o->okey, o->skewed_lineorders[lcnt].okey);
+		o->skewed_lineorders[lcnt].linenumber = lcnt + 1;
+		o->skewed_lineorders[lcnt].custkey = o->custkey;
+		RANDOM(o->skewed_lineorders[lcnt].partkey, L_PKEY_MIN, L_PKEY_MAX, L_PKEY_SD);
+		RANDOM(o->skewed_lineorders[lcnt].suppkey, L_SKEY_MIN, L_SKEY_MAX, L_SKEY_SD);
+
+		RANDOM(o->skewed_lineorders[lcnt].quantity, L_QTY_MIN, L_QTY_MAX, L_QTY_SD);
+		RANDOM(o->skewed_lineorders[lcnt].discount, L_DCNT_MIN, L_DCNT_MAX, L_DCNT_SD);
+		RANDOM(o->skewed_lineorders[lcnt].tax, L_TAX_MIN, L_TAX_MAX, L_TAX_SD);
+
+		strcpy(o->skewed_lineorders[lcnt].orderdate, o->odate);
+
+		strcpy(o->skewed_lineorders[lcnt].opriority, o->opriority);
+		o->skewed_lineorders[lcnt].ship_priority = o->spriority;
+
+		RANDOM(c_date, L_CDTE_MIN, L_CDTE_MAX, L_CDTE_SD);
+		c_date += tmp_date;
+		strcpy(o->skewed_lineorders[lcnt].commit_date, asc_date[c_date - STARTDATE]);
+
+		pick_str(&l_smode_set, L_SMODE_SD, o->skewed_lineorders[lcnt].shipmode);
+
+		RPRICE_BRIDGE(rprice, o->skewed_lineorders[lcnt].partkey);
+		o->skewed_lineorders[lcnt].extended_price = rprice * o->skewed_lineorders[lcnt].quantity;
+		o->skewed_lineorders[lcnt].revenue = o->skewed_lineorders[lcnt].extended_price * ((long)100 - o->skewed_lineorders[lcnt].discount) / (long)PENNIES;
+
+		//round off problem with linux if use 0.6
+		o->skewed_lineorders[lcnt].supp_cost = 6 * rprice / 10;
+
+		o->totalprice +=
+			((o->skewed_lineorders[lcnt].extended_price *
+			  ((long)100 - o->skewed_lineorders[lcnt].discount)) /
+			 (long)PENNIES) *
+			((long)100 + o->skewed_lineorders[lcnt].tax) / (long)PENNIES;
+	}
+
+	for (lcnt = 0; lcnt < o->lines; lcnt++)
+	{
+		o->skewed_lineorders[lcnt].order_totalprice = o->totalprice;
 	}
 	return (0);
 }

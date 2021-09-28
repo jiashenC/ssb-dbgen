@@ -103,6 +103,8 @@ typedef struct
     int spriority;
     long lines;
     lineorder_t lineorders[O_LCNT_MAX];
+    // used for skewed SSBM only
+    lineorder_t *skewed_lineorders;
 } order_t;
 #else
 typedef struct

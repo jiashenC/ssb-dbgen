@@ -385,10 +385,16 @@ void gen_tbl(int tnum, long start, long count, long upd_num)
 		init = 1;
 	}
 
+	printf("Start working: start: %d count: %d\n", start, count);
+	long total_count = count;
 	for (i = start; count; count--, i++)
 	{
 		LIFENOISE(1000, i);
 		row_start(tnum);
+
+		if (i % (total_count / 100) == 0) {
+			printf("Progress: %d\n", i);
+		}
 
 		switch (tnum)
 		{

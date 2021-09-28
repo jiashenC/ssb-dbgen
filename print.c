@@ -258,23 +258,23 @@ int pr_line(order_t *o, int mode)
     for (i = 0; i < o->lines; i++)
     {
         PR_STRT(fp_l);
-        PR_HUGE(fp_l, o->lineorders[i].okey);
-        PR_INT(fp_l, o->lineorders[i].linenumber);
-        PR_INT(fp_l, o->lineorders[i].custkey);
-        PR_INT(fp_l, o->lineorders[i].partkey);
-        PR_INT(fp_l, o->lineorders[i].suppkey);
-        PR_STR(fp_l, o->lineorders[i].orderdate, DATE_LEN);
-        PR_STR(fp_l, o->lineorders[i].opriority, O_OPRIO_LEN);
-        PR_INT(fp_l, o->lineorders[i].ship_priority);
-        PR_INT(fp_l, o->lineorders[i].quantity);
-        PR_INT(fp_l, o->lineorders[i].extended_price);
-        PR_INT(fp_l, o->lineorders[i].order_totalprice);
-        PR_INT(fp_l, o->lineorders[i].discount);
-        PR_INT(fp_l, o->lineorders[i].revenue);
-        PR_INT(fp_l, o->lineorders[i].supp_cost);
-        PR_INT(fp_l, o->lineorders[i].tax);
-        PR_STR(fp_l, o->lineorders[i].commit_date, DATE_LEN);
-        PR_STR(fp_l, o->lineorders[i].shipmode, O_SHIP_MODE_LEN);
+        PR_HUGE(fp_l, o->skewed_lineorders[i].okey);
+        PR_INT(fp_l, o->skewed_lineorders[i].linenumber);
+        PR_INT(fp_l, o->skewed_lineorders[i].custkey);
+        PR_INT(fp_l, o->skewed_lineorders[i].partkey);
+        PR_INT(fp_l, o->skewed_lineorders[i].suppkey);
+        PR_STR(fp_l, o->skewed_lineorders[i].orderdate, DATE_LEN);
+        PR_STR(fp_l, o->skewed_lineorders[i].opriority, O_OPRIO_LEN);
+        PR_INT(fp_l, o->skewed_lineorders[i].ship_priority);
+        PR_INT(fp_l, o->skewed_lineorders[i].quantity);
+        PR_INT(fp_l, o->skewed_lineorders[i].extended_price);
+        PR_INT(fp_l, o->skewed_lineorders[i].order_totalprice);
+        PR_INT(fp_l, o->skewed_lineorders[i].discount);
+        PR_INT(fp_l, o->skewed_lineorders[i].revenue);
+        PR_INT(fp_l, o->skewed_lineorders[i].supp_cost);
+        PR_INT(fp_l, o->skewed_lineorders[i].tax);
+        PR_STR(fp_l, o->skewed_lineorders[i].commit_date, DATE_LEN);
+        PR_STR(fp_l, o->skewed_lineorders[i].shipmode, O_SHIP_MODE_LEN);
         PR_END(fp_l);
     }
 
