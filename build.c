@@ -199,6 +199,70 @@ void hd_sparse(long i, DSS_HUGE *ok, long seq)
 #endif
 
 #ifdef SSBM
+long to_year(long tmp_date)
+{
+	long offset = tmp_date - O_ODATE_MIN;
+	if (offset <= 366)
+	{
+		return 1992;
+	}
+	else if (offset <= 731)
+	{
+		return 1993;
+	}
+	else if (offset <= 1096)
+	{
+		return 1994;
+	}
+	else if (offset <= 1461)
+	{
+		return 1995;
+	}
+	else if (offset <= 1827)
+	{
+		return 1996;
+	}
+	else if (offset <= 2192)
+	{
+		return 1997;
+	}
+	return 1998;
+}
+
+void set_specific_date(long *tmp_date)
+{
+	long offset, year_offset;
+	if (to_year(*tmp_date) == 1992)
+	{
+		offset = 0, year_offset = 149;
+	}
+	else if (to_year(*tmp_date) == 1993)
+	{
+		offset = 366, year_offset = 148;
+	}
+	else if (to_year(*tmp_date) == 1994)
+	{
+		offset = 731, year_offset = 148;
+	}
+	else if (to_year(*tmp_date) == 1995)
+	{
+		offset = 1096, year_offset = 148;
+	}
+	else if (to_year(*tmp_date) == 1996)
+	{
+		offset = 1461, year_offset = 149;
+	}
+	else if (to_year(*tmp_date) == 1997)
+	{
+		offset = 1827, year_offset = 148;
+	}
+	else
+	{
+		offset = 2192, year_offset = 148;
+	}
+	*tmp_date = (O_ODATE_MIN + offset + year_offset);
+}
+
 long mk_order(long index, order_t *o, long upd_num)
 {
 	long lcnt;
@@ -216,18 +280,43 @@ long mk_order(long index, order_t *o, long upd_num)
 	if (asc_date == NULL)
 		asc_date = mk_ascdate();
 
-	RANDOM(tmp_date, O_ODATE_MIN, O_ODATE_MAX, O_ODATE_SD);
-	strcpy(o->odate, asc_date[tmp_date - STARTDATE]);
-
 	mk_sparse(index, o->okey,
 			  (upd_num == 0) ? 0 : 1 + upd_num / (10000 / refresh));
-	RANDOM(o->custkey, O_CKEY_MIN, O_CKEY_MAX, O_CKEY_SD);
-	while (o->custkey % CUST_MORTALITY == 0)
+
+	// SSBORG: date is first generated before order key
+	// now it is generated after order key and date is
+	// set based on the order key
+	RANDOM(tmp_date, O_ODATE_MIN, O_ODATE_MAX, O_ODATE_SD);
+	if (1 <= (*o->okey) && (*o->okey) <= 5)
 	{
-		o->custkey += delta;
-		o->custkey = MIN(o->custkey, O_CKEY_MAX);
-		delta *= -1;
+		set_specific_date(&tmp_date);
 	}
+	else if (to_year(tmp_date) != 1995 && to_year(tmp_date) != 1996 && UnifReal(0, 1, 0xffff) <= 0.5)
+	{
+		set_specific_date(&tmp_date);
+	}
+	strcpy(o->odate, asc_date[tmp_date - STARTDATE]);
+
+	// SSBMORG: uniform random customer key generation
+	// skewed generation of customer key
+	// 25% --> one of 5 populous customers are selected
+	// otherwise --> any customer is uniformly picked
+	if (UnifReal(0, 1, 0xffff) <= 0.25)
+	{
+		RANDOM(o->custkey, 1, 5, O_CKEY_SD);
+		o->custkey = (o->custkey - 1) * O_CKEY_MAX / 5;
+	}
+	else
+	{
+		RANDOM(o->custkey, O_CKEY_MIN, O_CKEY_MAX, O_CKEY_SD);
+		while (o->custkey % CUST_MORTALITY == 0 + 2)
+		{
+			o->custkey += delta;
+			o->custkey = MIN(o->custkey, O_CKEY_MAX);
+			delta *= -1;
+		}
+	}
+
 	pick_str(&o_priority_set, O_PRIO_SD, o->opriority);
 	RANDOM(clk_num, 1, MAX((scale * O_CLRK_SCL), O_CLRK_SCL), O_CLRK_SD);
 	o->spriority = 0;
@@ -238,7 +327,7 @@ long mk_order(long index, order_t *o, long upd_num)
 	// SSBMORG: number of items per order is random
 	// RANDOM(o->lines, O_LCNT_MIN, O_LCNT_MAX, O_LCNT_SD);
 	// skewed so 5 orders have 300003 items, other only 3 items
-	if (0 <= *(o->okey) && *(o->okey) < 5)
+	if (1 <= *(o->okey) && *(o->okey) <= 5)
 	{
 		o->lines = 300003;
 	}
@@ -246,11 +335,12 @@ long mk_order(long index, order_t *o, long upd_num)
 	{
 		o->lines = 3;
 	}
-	o->skewed_lineorders = (lineorder_t*)malloc(sizeof(lineorder_t) * o->lines);
+	o->skewed_lineorders = (lineorder_t *)malloc(sizeof(lineorder_t) * o->lines);
 
-	// init 
-	for (lcnt = 0; lcnt < o->lines; lcnt++) {
-		o->skewed_lineorders[lcnt].okey = (DSS_HUGE*)malloc(sizeof(DSS_HUGE));
+	// init
+	for (lcnt = 0; lcnt < o->lines; lcnt++)
+	{
+		o->skewed_lineorders[lcnt].okey = (DSS_HUGE *)malloc(sizeof(DSS_HUGE));
 	}
 
 	for (lcnt = 0; lcnt < o->lines; lcnt++)
