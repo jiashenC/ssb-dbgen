@@ -293,15 +293,15 @@ int ld_region PROTO((code_t * c, int mode));
 // SSBMORG: add meta data
 typedef struct
 {
-	char reg_name[S_REGION_NAME_LEN + 1];
-	long supp_key;
+    char reg_name[S_REGION_NAME_LEN + 1];
+    long supp_key;
     UT_hash_handle hh;
 } reg_name_to_supp_key_dict_t;
 
 typedef struct
 {
-	long cust_key;
-	char reg_name[S_REGION_NAME_LEN + 1];
+    long cust_key;
+    char reg_name[S_REGION_NAME_LEN + 1];
     UT_hash_handle hh;
 } cust_key_to_reg_name_dict_t;
 
