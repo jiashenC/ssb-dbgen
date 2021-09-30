@@ -24,7 +24,7 @@ def test_customer(text_entry):
         customer_count[cust_key].add(o_key)
 
     for cust_key in range(5):
-        cust_key *= (30000 // 5)
+        cust_key = cust_key * (30000 // 5) + 1
         assert(0.04 <= len(customer_count[cust_key]) / 1500000 <= 0.06)
 
 def test_date(text_entry):

@@ -3,6 +3,7 @@
 /* stuff related to the customer table */
 #include <stdio.h>
 #include <string.h>
+#include <assert.h>
 #ifdef SSBM
 #include <time.h>
 #endif
@@ -26,6 +27,9 @@
 #include "adhoc.h"
 extern adhoc_t adhocs[];
 #endif /* ADHOC */
+
+extern reg_name_to_supp_key_dict_t *reg_name_to_supp_key;
+extern cust_key_to_reg_name_dict_t *cust_key_to_reg_name;
 
 #define LEAP_ADJ(yr, mnth) \
 	((LEAP(yr) && (mnth) >= 2) ? 1 : 0)
@@ -106,7 +110,20 @@ long mk_cust(long n_cust, customer_t *c)
 	c->alen = V_STR(C_ADDR_LEN, C_ADDR_SD, c->address);
 	RANDOM(i, 0, nations.count - 1, C_NTRG_SD);
 	strcpy(c->nation_name, nations.list[i].text);
+
+	// SSBMORG
+	// map customer key to region name
 	strcpy(c->region_name, regions.list[nations.list[i].weight].text);
+	cust_key_to_reg_name_dict_t *tmp;
+	HASH_FIND(hh, cust_key_to_reg_name, &c->custkey, sizeof(long), tmp);
+	if (!tmp)
+	{
+		cust_key_to_reg_name_dict_t *insert = (cust_key_to_reg_name_dict_t *)malloc(sizeof(cust_key_to_reg_name_dict_t));
+		insert->cust_key = c->custkey;
+		strcpy(insert->reg_name, c->region_name);
+		HASH_ADD(hh, cust_key_to_reg_name, cust_key, sizeof(long), insert);
+	}
+
 	gen_city(c->city, c->nation_name);
 	gen_phone(i, c->phone, (long)C_PHNE_SD);
 	pick_str(&c_mseg_set, C_MSEG_SD, c->mktsegment);
@@ -283,7 +300,7 @@ long mk_order(long index, order_t *o, long upd_num)
 	mk_sparse(index, o->okey,
 			  (upd_num == 0) ? 0 : 1 + upd_num / (10000 / refresh));
 
-	// SSBORG: date is first generated before order key
+	// SSBMORG: date is first generated before order key
 	// now it is generated after order key and date is
 	// set based on the order key
 	RANDOM(tmp_date, O_ODATE_MIN, O_ODATE_MAX, O_ODATE_SD);
@@ -303,8 +320,9 @@ long mk_order(long index, order_t *o, long upd_num)
 	// otherwise --> any customer is uniformly picked
 	if (UnifReal(0, 1, 0xffff) <= 0.25)
 	{
-		RANDOM(o->custkey, 1, 5, O_CKEY_SD);
-		o->custkey = (o->custkey - 1) * O_CKEY_MAX / 5;
+		long offset;
+		RANDOM(offset, 0, 4, O_CKEY_SD);
+		o->custkey = offset * O_CKEY_MAX / 5 + 1;
 	}
 	else
 	{
@@ -350,8 +368,64 @@ long mk_order(long index, order_t *o, long upd_num)
 		HUGE_SET(o->okey, o->skewed_lineorders[lcnt].okey);
 		o->skewed_lineorders[lcnt].linenumber = lcnt + 1;
 		o->skewed_lineorders[lcnt].custkey = o->custkey;
-		RANDOM(o->skewed_lineorders[lcnt].partkey, L_PKEY_MIN, L_PKEY_MAX, L_PKEY_SD);
-		RANDOM(o->skewed_lineorders[lcnt].suppkey, L_SKEY_MIN, L_SKEY_MAX, L_SKEY_SD);
+
+		// SSBMORG
+		// set suppkey with skew
+		if (lcnt == 0 || (1 <= *o->okey && *o->okey <= 5))
+		{
+			cust_key_to_reg_name_dict_t *cust_tmp;
+			HASH_FIND(hh, cust_key_to_reg_name, &o->custkey, sizeof(long), cust_tmp);
+			assert(cust_tmp != NULL);
+
+			reg_name_to_supp_key_dict_t *supp_tmp;
+			HASH_FIND_STR(reg_name_to_supp_key, cust_tmp->reg_name, supp_tmp);
+			assert(supp_tmp != NULL);
+
+			o->skewed_lineorders[lcnt].suppkey = supp_tmp->supp_key;
+		}
+		else
+		{
+			RANDOM(o->skewed_lineorders[lcnt].suppkey, L_SKEY_MIN, L_SKEY_MAX, L_SKEY_SD);
+		}
+
+		//SSBMORG
+		// skewed part
+		if (lcnt == 0)
+		{
+			cust_key_to_reg_name_dict_t *cust_tmp;
+			HASH_FIND(hh, cust_key_to_reg_name, &o->custkey, sizeof(long), cust_tmp);
+			assert(cust_tmp != NULL);
+
+			if (!strcmp(cust_tmp->reg_name, "AMERICA"))
+			{
+				o->skewed_lineorders[lcnt].partkey = 1;
+			}
+			else if (!strcmp(cust_tmp->reg_name, "ASIA"))
+			{
+				o->skewed_lineorders[lcnt].partkey = 1 + L_PKEY_MAX / 5;
+			}
+			else if (!strcmp(cust_tmp->reg_name, "AFRICA"))
+			{
+				o->skewed_lineorders[lcnt].partkey = 1 + L_PKEY_MAX / 5 * 2;
+			}
+			else if (!strcmp(cust_tmp->reg_name, "EUROPE"))
+			{
+				o->skewed_lineorders[lcnt].partkey = 1 + L_PKEY_MAX / 5 * 3;
+			}
+			else if (!strcmp(cust_tmp->reg_name, "MIDDLE EAST"))
+			{
+				o->skewed_lineorders[lcnt].partkey = 1 + L_PKEY_MAX / 5 * 4;
+			}
+			else
+			{
+				printf("Region %s is undefined\n", cust_tmp->reg_name);
+				assert(0 == 1);
+			}
+		}
+		else
+		{
+			RANDOM(o->skewed_lineorders[lcnt].partkey, L_PKEY_MIN, L_PKEY_MAX, L_PKEY_SD);
+		}
 
 		RANDOM(o->skewed_lineorders[lcnt].quantity, L_QTY_MIN, L_QTY_MAX, L_QTY_SD);
 		RANDOM(o->skewed_lineorders[lcnt].discount, L_DCNT_MIN, L_DCNT_MAX, L_DCNT_SD);
@@ -573,6 +647,19 @@ long mk_supp(long index, supplier_t *s)
 	RANDOM(i, 0, nations.count - 1, S_NTRG_SD);
 	strcpy(s->nation_name, nations.list[i].text);
 	strcpy(s->region_name, regions.list[nations.list[i].weight].text);
+
+	// SSBMORG
+	// record a populous supplier per region
+	reg_name_to_supp_key_dict_t *tmp;
+	HASH_FIND_STR(reg_name_to_supp_key, s->region_name, tmp);
+	if (!tmp)
+	{
+		reg_name_to_supp_key_dict_t *insert = (reg_name_to_supp_key_dict_t *)malloc(sizeof(reg_name_to_supp_key_dict_t));
+		strcpy(insert->reg_name, s->region_name);
+		insert->supp_key = s->suppkey;
+		HASH_ADD_STR(reg_name_to_supp_key, reg_name, insert);
+	}
+
 	gen_city(s->city, s->nation_name);
 	gen_phone(i, s->phone, (long)C_PHNE_SD);
 	return (0);

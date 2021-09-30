@@ -1,5 +1,6 @@
 /* Sccsid:     @(#)varsub.c	2.1.8.3 */
 #include "config.h"
+#include "uthash.h"
 #include <stdio.h>
 #ifndef _POSIX_SOURCE
 #include <malloc.h>
@@ -12,6 +13,7 @@
 #include <string.h>
 #include "config.h"
 #include "dss.h"
+#include "dsstypes.h"
 #include "tpcd.h"
 #ifdef ADHOC
 #include "adhoc.h"
@@ -23,6 +25,10 @@ extern adhoc_t adhocs[];
 extern long Seed[];
 extern char **asc_date;
 extern double flt_scale;
+
+// SSBORG: add meta data
+static reg_name_to_supp_key_dict_t *reg_name_to_supp_key;
+
 extern distribution q13a, q13b;
 long *permute(long *set, int cnt, long stream);
 
