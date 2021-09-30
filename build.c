@@ -28,8 +28,11 @@
 extern adhoc_t adhocs[];
 #endif /* ADHOC */
 
+// SSBMORG
+// global data used by skewed SSB generation
 extern reg_name_to_supp_key_dict_t *reg_name_to_supp_key;
 extern cust_key_to_reg_name_dict_t *cust_key_to_reg_name;
+static count = 0;
 
 #define LEAP_ADJ(yr, mnth) \
 	((LEAP(yr) && (mnth) >= 2) ? 1 : 0)
@@ -371,7 +374,7 @@ long mk_order(long index, order_t *o, long upd_num)
 
 		// SSBMORG
 		// set suppkey with skew
-		if (lcnt == 0 || (1 <= *o->okey && *o->okey <= 5))
+		if (lcnt == 0 || (1 <= *(o->okey) && *(o->okey) <= 5))
 		{
 			cust_key_to_reg_name_dict_t *cust_tmp;
 			HASH_FIND(hh, cust_key_to_reg_name, &o->custkey, sizeof(long), cust_tmp);
@@ -382,6 +385,11 @@ long mk_order(long index, order_t *o, long upd_num)
 			assert(supp_tmp != NULL);
 
 			o->skewed_lineorders[lcnt].suppkey = supp_tmp->supp_key;
+
+			count++;
+			if (count % 50000 == 0) {
+				printf("%ld\n", count);
+			}
 		}
 		else
 		{
