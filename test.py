@@ -12,7 +12,8 @@ def test_order_line(line_order_text_entry):
         order_count[o_key] += 1
 
     for i in range(1, 6):
-        assert 0.04 <= (order_count[i] / (6000000 * SCALE)) <= 0.06, order_count[i]
+        assert 0.04 <= (order_count[i] /
+                        (6000000 * SCALE)) <= 0.06, order_count[i]
 
     for o_key in order_count:
         if o_key in list(range(1, 6)):
