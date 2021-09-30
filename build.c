@@ -350,7 +350,7 @@ long mk_order(long index, order_t *o, long upd_num)
 	// skewed so 5 orders have 300003 items, other only 3 items
 	if (1 <= *(o->okey) && *(o->okey) <= 5)
 	{
-		o->lines = 300003;
+		o->lines = (6000000 * scale - (1500000 * scale - 5) * 3) / 5;
 	}
 	else
 	{
@@ -385,11 +385,6 @@ long mk_order(long index, order_t *o, long upd_num)
 			assert(supp_tmp != NULL);
 
 			o->skewed_lineorders[lcnt].suppkey = supp_tmp->supp_key;
-
-			count++;
-			if (count % 50000 == 0) {
-				printf("%ld\n", count);
-			}
 		}
 		else
 		{

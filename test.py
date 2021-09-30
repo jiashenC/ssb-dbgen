@@ -12,12 +12,12 @@ def test_order_line(line_order_text_entry):
         order_count[o_key] += 1
 
     for i in range(1, 6):
-        assert(order_count[i] == 300003 * SCALE)
+        assert 0.04 <= (order_count[i] / (6000000 * SCALE)) <= 0.06, order_count[i]
 
     for o_key in order_count:
         if o_key in list(range(1, 6)):
             continue
-        assert(order_count[o_key] == 3)
+        assert order_count[o_key] == 3, order_count[o_key]
 
 
 def test_customer(line_order_text_entry):
@@ -28,8 +28,8 @@ def test_customer(line_order_text_entry):
 
     for cust_key in range(5):
         cust_key = cust_key * (30000 // 5 * SCALE) + 1
-        assert(0.04 <= len(
-            customer_count[cust_key]) / (1500000 * SCALE) <= 0.06)
+        assert 0.04 <= (len(
+            customer_count[cust_key]) / (1500000 * SCALE)) <= 0.06, customer_count[cust_key]
 
 
 def test_date(line_order_text_entry):
@@ -40,7 +40,8 @@ def test_date(line_order_text_entry):
         date_without_year = '-'.join(date_txt.split('-')[1:])
         date_count[date_without_year] += 1
 
-    assert(0.51 <= date_count['05-29'] / (6000000 * SCALE) <= 0.53)
+    assert 0.51 <= (date_count['05-29'] /
+                    (6000000 * SCALE)) <= 0.53, date_count['05-29']
 
 
 def test_supplier(line_order_text_entry, supplier_text_entry):
@@ -59,7 +60,8 @@ def test_supplier(line_order_text_entry, supplier_text_entry):
     for region in supplier_count:
         total_supp_count += max(supplier_count[region].values())
 
-    assert(0.49 <= total_supp_count / (6000000 * SCALE) <= 0.51)
+    assert 0.49 <= (total_supp_count / (6000000 * SCALE)
+                    ) <= 0.51, total_supp_count
 
 
 def main():
