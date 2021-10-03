@@ -399,23 +399,23 @@ long mk_order(long index, order_t *o, long upd_num)
 			HASH_FIND(hh, cust_key_to_reg_name, &o->custkey, sizeof(long), cust_tmp);
 			assert(cust_tmp != NULL);
 
-			if (!strcmp(cust_tmp->reg_name, "AMERICA"))
+			if (!strcmp(cust_tmp->reg_name, "AMERICA\0"))
 			{
 				o->skewed_lineorders[lcnt].partkey = 1;
 			}
-			else if (!strcmp(cust_tmp->reg_name, "ASIA"))
+			else if (!strcmp(cust_tmp->reg_name, "ASIA\0"))
 			{
 				o->skewed_lineorders[lcnt].partkey = 1 + L_PKEY_MAX / 5;
 			}
-			else if (!strcmp(cust_tmp->reg_name, "AFRICA"))
+			else if (!strcmp(cust_tmp->reg_name, "AFRICA\0"))
 			{
 				o->skewed_lineorders[lcnt].partkey = 1 + L_PKEY_MAX / 5 * 2;
 			}
-			else if (!strcmp(cust_tmp->reg_name, "EUROPE"))
+			else if (!strcmp(cust_tmp->reg_name, "EUROPE\0"))
 			{
 				o->skewed_lineorders[lcnt].partkey = 1 + L_PKEY_MAX / 5 * 3;
 			}
-			else if (!strcmp(cust_tmp->reg_name, "MIDDLE EAST"))
+			else if (!strcmp(cust_tmp->reg_name, "MIDDLE EAST\0"))
 			{
 				o->skewed_lineorders[lcnt].partkey = 1 + L_PKEY_MAX / 5 * 4;
 			}
