@@ -501,7 +501,7 @@ extern tdef tdefs[];
 
 /******* output macros ********/
 #ifndef SEPARATOR
-#define SEPARATOR ',' /* field spearator for generated flat files */
+#define SEPARATOR '|' /* field spearator for generated flat files */
 #endif
 /* Data type flags for a single print routine */
 #define DT_STR 0
@@ -530,7 +530,7 @@ int dbg_print(int dt, FILE *tgt, void *data, int len, int eol);
 
 #ifdef SSBM
 #define PR_DATE(tgt, yr, mn, dy) \
-   sprintf(tgt, "19%02d-%02d-%02d", yr, mn, dy)
+   sprintf(tgt, "19%02d%02d%02d", yr, mn, dy)
 #else
 #ifdef MDY_DATE
 #define PR_DATE(tgt, yr, mn, dy) \
