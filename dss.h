@@ -1,7 +1,7 @@
 /*
  * Sccsid:     @(#)dss.h	2.1.8.5
  *
- * general definitions and control information for the DSS code 
+ * general definitions and control information for the DSS code
  * generator; if it controls the data set, it's here
  */
 #ifndef DSS_H
@@ -78,31 +78,28 @@
 #define MAX(a, b) ((a > b) ? a : b)
 #define MIN(A, B) ((A) < (B) ? (A) : (B))
 
-#define INTERNAL_ERROR(p)       \
-   {                            \
-      fprintf(stderr, "%s", p); \
-      abort();                  \
-   }
+#define INTERNAL_ERROR(p)                                                      \
+  {                                                                            \
+    fprintf(stderr, "%s", p);                                                  \
+    abort();                                                                   \
+  }
 #define LN_CNT 4
 static char lnoise[4] = {'|', '/', '-', '\\'};
-#define LIFENOISE(n, var) \
-   if (verbose > 0)       \
-   fprintf(stderr, "%c\b", lnoise[(var % LN_CNT)])
+#define LIFENOISE(n, var)                                                      \
+  if (verbose > 0)                                                             \
+  fprintf(stderr, "%c\b", lnoise[(var % LN_CNT)])
 
-#define MALLOC_CHECK(var)                         \
-   if ((var) == NULL)                             \
-   {                                              \
-      fprintf(stderr, "Malloc failed at %s:%d\n", \
-              __FILE__, __LINE__);                \
-      exit(1);                                    \
-   }
-#define OPEN_CHECK(var, path)                          \
-   if ((var) == NULL)                                  \
-   {                                                   \
-      fprintf(stderr, "Open failed for %s at %s:%d\n", \
-              path, __FILE__, __LINE__);               \
-      exit(1);                                         \
-   }
+#define MALLOC_CHECK(var)                                                      \
+  if ((var) == NULL) {                                                         \
+    fprintf(stderr, "Malloc failed at %s:%d\n", __FILE__, __LINE__);           \
+    exit(1);                                                                   \
+  }
+#define OPEN_CHECK(var, path)                                                  \
+  if ((var) == NULL) {                                                         \
+    fprintf(stderr, "Open failed for %s at %s:%d\n", path, __FILE__,           \
+            __LINE__);                                                         \
+    exit(1);                                                                   \
+  }
 #ifndef MAX_CHILDREN
 #define MAX_CHILDREN 1000
 #endif
@@ -118,67 +115,61 @@ static char lnoise[4] = {'|', '/', '-', '\\'};
 #endif /* BITS_PER_LONG */
 #define SPARSE_BITS 2
 #define SPARSE_KEEP 3
-#define MK_SPARSE(key, seq) \
-   (((((key >> 3) << 2) | (seq & 0x0003)) << 3) | (key & 0x0007))
+#define MK_SPARSE(key, seq)                                                    \
+  (((((key >> 3) << 2) | (seq & 0x0003)) << 3) | (key & 0x0007))
 
 #define RANDOM(tgt, lower, upper, stream) dss_random(&tgt, lower, upper, stream)
 #ifdef SSBM
-typedef struct
-{
-   char *name;
-   int start_day;
-   int start_month;
-   int end_day;
-   int end_month;
+typedef struct {
+  char *name;
+  int start_day;
+  int start_month;
+  int end_day;
+  int end_month;
 } season;
-typedef struct
-{
-   char *name;
-   int month;
-   int day;
+typedef struct {
+  char *name;
+  int month;
+  int day;
 } holiday;
 
 #endif
 
-typedef struct
-{
-   long weight;
-   char *text;
+typedef struct {
+  long weight;
+  char *text;
 } set_member;
 
-typedef struct
-{
-   int count;
-   int max;
-   set_member *list;
-   long *permute;
+typedef struct {
+  int count;
+  int max;
+  set_member *list;
+  long *permute;
 } distribution;
 
 /*
- * some handy access functions 
+ * some handy access functions
  */
 #define DIST_SIZE(d) d->count
 #define DIST_MEMBER(d, i) ((set_member *)((d)->list + i))->text
 
-typedef struct
-{
-   char *name;
-   char *comment;
-   long base;
-   int (*header)();
-   int (*loader[2])();
-   long (*gen_seed)();
-   int (*verify)();
-   int child;
-   unsigned long vtotal;
+typedef struct {
+  char *name;
+  char *comment;
+  long base;
+  int (*header)();
+  int (*loader[2])();
+  long (*gen_seed)();
+  int (*verify)();
+  int child;
+  unsigned long vtotal;
 } tdef;
 
-typedef struct SEED_T
-{
-   long table;
-   long value;
-   long usage;
-   long boundary;
+typedef struct SEED_T {
+  long table;
+  long value;
+  long usage;
+  long boundary;
 } seed_t;
 
 #if defined(__STDC__)
@@ -200,7 +191,8 @@ long dsscasecmp PROTO((char *s1, char *s2));
 int pick_str PROTO((distribution * s, int c, char *target));
 void agg_str PROTO((distribution * set, long count, long col, char *dest));
 void read_dist PROTO((char *path, char *name, distribution *target));
-void embed_str PROTO((distribution * d, int min, int max, int stream, char *dest));
+void embed_str PROTO((distribution * d, int min, int max, int stream,
+                      char *dest));
 #ifndef STDLIB_HAS_GETOPT
 int getopt PROTO((int arg_cnt, char **arg_vect, char *oprions));
 #endif /* STDLIB_HAS_GETOPT */
@@ -370,8 +362,7 @@ extern tdef tdefs[];
 #define O_CKEY_MIN 1
 #define O_CKEY_MAX (long)(tdefs[CUST].base * scale)
 #define O_ODATE_MIN STARTDATE
-#define O_ODATE_MAX (STARTDATE + TOTDATE - \
-                     (L_SDTE_MAX + L_RDTE_MAX) - 1)
+#define O_ODATE_MAX (STARTDATE + TOTDATE - (L_SDTE_MAX + L_RDTE_MAX) - 1)
 #define O_CLRK_TAG "Clerk#"
 #define O_CLRK_FMT "%s%09d"
 #define O_CLRK_SCL 1000
@@ -440,11 +431,11 @@ extern tdef tdefs[];
  * beyond this point we need to allow for BCD calculations
  */
 #define MAX_32B_SCALE 1000.0
-#define INIT_HUGE(v)                                         \
-   {                                                         \
-      v = (DSS_HUGE *)malloc(sizeof(DSS_HUGE) * HUGE_COUNT); \
-      MALLOC_CHECK(v);                                       \
-   }
+#define INIT_HUGE(v)                                                           \
+  {                                                                            \
+    v = (DSS_HUGE *)malloc(sizeof(DSS_HUGE) * HUGE_COUNT);                     \
+    MALLOC_CHECK(v);                                                           \
+  }
 #define FREE_HUGE(v) free(v)
 #ifdef SUPPORT_64BITS
 #define LONG2HUGE(src, dst) *dst = (DSS_HUGE)src
@@ -457,36 +448,39 @@ extern tdef tdefs[];
 #define HUGE_MOD(op1, op2) *op1 % op2
 #define HUGE_CMP(op1, op2) (*op1 == *op2) ? 0 : (*op1 < *op2) - 1 : 1
 #else
-#define LONG2HUGE(src, dst) \
-   {                        \
-      *dst = src;           \
-      *(dst + 1) = 0;       \
-   }
-#define HUGE2LONG(src, dst)     \
-   {                            \
-      dst = 0;                  \
-      bcd2_bin(dst, (src + 1)); \
-      bcd2_bin(dst, src);       \
-   }
-#define HUGE_SET(src, dst)     \
-   {                           \
-      *dst = *src;             \
-      *(dst + 1) = *(src + 1); \
-   }
+#define LONG2HUGE(src, dst)                                                    \
+  {                                                                            \
+    *dst = src;                                                                \
+    *(dst + 1) = 0;                                                            \
+  }
+#define HUGE2LONG(src, dst)                                                    \
+  {                                                                            \
+    dst = 0;                                                                   \
+    bcd2_bin(dst, (src + 1));                                                  \
+    bcd2_bin(dst, src);                                                        \
+  }
+#define HUGE_SET(src, dst)                                                     \
+  {                                                                            \
+    *dst = *src;                                                               \
+    *(dst + 1) = *(src + 1);                                                   \
+  }
 #define HUGE_MUL(op1, op2) bcd2_mul(op1, (op1 + 1), op2)
 #define HUGE_DIV(op1, op2) bcd2_div(op1, (op1 + 1), op2)
-#define HUGE_ADD(op1, op2, d)    \
-   {                             \
-      HUGE_SET(op1, d);          \
-      bcd2_add(d, (d + 1), op2); \
-   }
-#define HUGE_SUB(op1, op2, d)    \
-   {                             \
-      HUGE_SET(op1, d);          \
-      bcd2_sub(d, (d + 1), op2); \
-   }
+#define HUGE_ADD(op1, op2, d)                                                  \
+  {                                                                            \
+    HUGE_SET(op1, d);                                                          \
+    bcd2_add(d, (d + 1), op2);                                                 \
+  }
+#define HUGE_SUB(op1, op2, d)                                                  \
+  {                                                                            \
+    HUGE_SET(op1, d);                                                          \
+    bcd2_sub(d, (d + 1), op2);                                                 \
+  }
 #define HUGE_MOD(op1, op2) bcd2_mod(op1, (op1 + 1), op2)
-#define HUGE_CMP(op1, op2) (bcd2_cmp(op1, (op1 + 1), op2) == 0) ? 0 : ((bcd2_cmp(op1, (op1 + 1), op2) < 0) ? -1 : 1)
+#define HUGE_CMP(op1, op2)                                                     \
+  (bcd2_cmp(op1, (op1 + 1), op2) == 0)                                         \
+      ? 0                                                                      \
+      : ((bcd2_cmp(op1, (op1 + 1), op2) < 0) ? -1 : 1)
 #endif /* SUPPORT_64BITS */
 
 /******** environmental variables and defaults ***************/
@@ -529,26 +523,23 @@ int dbg_print(int dt, FILE *tgt, void *data, int len, int eol);
 #define PR_END(fp) fprintf(fp, "\n") /* finish the record here */
 
 #ifdef SSBM
-#define PR_DATE(tgt, yr, mn, dy) \
-   sprintf(tgt, "19%02d-%02d-%02d", yr, mn, dy)
+#define PR_DATE(tgt, yr, mn, dy) sprintf(tgt, "19%02d-%02d-%02d", yr, mn, dy)
 #else
 #ifdef MDY_DATE
-#define PR_DATE(tgt, yr, mn, dy) \
-   sprintf(tgt, "%02d-%02d-19%02d", mn, dy, yr)
+#define PR_DATE(tgt, yr, mn, dy) sprintf(tgt, "%02d-%02d-19%02d", mn, dy, yr)
 #else
-#define PR_DATE(tgt, yr, mn, dy) \
-   sprintf(tgt, "19%02d-%02d-%02d", yr, mn, dy)
+#define PR_DATE(tgt, yr, mn, dy) sprintf(tgt, "19%02d-%02d-%02d", yr, mn, dy)
 #endif /* DATE_FORMAT */
 #endif
 /*
  * verification macros
  */
-#define VRF_STR(t, d)              \
-   {                               \
-      char *xx = d;                \
-      while (*xx)                  \
-         tdefs[t].vtotal += *xx++; \
-   }
+#define VRF_STR(t, d)                                                          \
+  {                                                                            \
+    char *xx = d;                                                              \
+    while (*xx)                                                                \
+      tdefs[t].vtotal += *xx++;                                                \
+  }
 #define VRF_INT(t, d) tdefs[t].vtotal += d
 #ifdef SUPPORT_64BITS
 #define VRF_HUGE(t, d) tdefs[t].vtotal = *((long *)&d) + *((long *)(&d + 1))

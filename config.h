@@ -1,10 +1,10 @@
-/* 
+/*
  * Sccsid:     @(#)config.h	2.1.8.2
- * 
+ *
  * this file allows the compilation of DBGEN to be tailored to specific
- * architectures and operating systems. Some options are grouped 
+ * architectures and operating systems. Some options are grouped
  * together to allow easier compilation on a given vendor's hardware.
- * 
+ *
  * The following #defines will effect the code:
  *   TPCH              -- make will create TPCH (set in makefile)
  *   TPCR              -- make will create TPCR (set in makefile)
@@ -14,7 +14,7 @@
  *   WAIT(res, pid)    -- how to await the termination of a child
  *   SEPARATOR         -- character used to separate fields in flat files
  *   DBNAME            -- default name of database to be loaded
- *   STDLIB_HAS_GETOPT -- to prevent confilcts with gloabal getopt() 
+ *   STDLIB_HAS_GETOPT -- to prevent confilcts with gloabal getopt()
  *   MDY_DATE          -- generate dates as MM-DD-YY
  *   WIN32             -- support for WindowsNT
  *   SUPPORT_64BITS    -- compiler defines a 64 bit datatype
@@ -126,8 +126,8 @@
 #if (defined(WIN32) && !defined(_POSIX_))
 #define pid_t int
 #define SET_HANDLER(proc) signal(SIGINT, proc)
-#define KILL(pid) \
-     TerminateProcess(OpenProcess(PROCESS_TERMINATE, FALSE, pid), 3)
+#define KILL(pid)                                                              \
+  TerminateProcess(OpenProcess(PROCESS_TERMINATE, FALSE, pid), 3)
 #if (defined(__WATCOMC__))
 #define SPAWN() spawnv(P_NOWAIT, spawn_args[0], spawn_args)
 #define WAIT(res, pid) cwait(res, pid, WAIT_CHILD)
@@ -145,7 +145,8 @@
 #define HUGE_FORMAT "%I64d"
 #endif /* TEST_32B */
 /* need to define process termination codes to match UNIX */
-/* these are copied from Linux/GNU and need to be verified as part of a rework of */
+/* these are copied from Linux/GNU and need to be verified as part of a rework
+ * of */
 /* process handling under NT (29 Apr 98) */
 #define WIFEXITED(s) ((s & 0xFF) == 0)
 #define WIFSIGNALED(s) (((unsigned int)((status)-1) & 0xFFFF) < 0xFF)

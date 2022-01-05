@@ -1,6 +1,6 @@
 /*****************************************************************
  *  Title: tpcd.h for TPC D
- *  Sccsid: @(#)tpcd.h	2.1.8.1 
+ *  Sccsid: @(#)tpcd.h	2.1.8.1
  *  Description:
  *  X
  *
@@ -93,8 +93,9 @@ EXTERN char *tfile;
 
 #define MAX_PERMUTE 41
 #ifdef DECLARER
-int rowcnt_dflt[QUERIES_PER_SET + 1] =
-    {-1, -1, 100, 10, -1, -1, -1, -1, -1, -1, 20, -1, -1, -1, -1, -1, -1, -1, 100, -1, -1, 100, -1};
+int rowcnt_dflt[QUERIES_PER_SET + 1] = {-1, -1, 100, 10, -1, -1,  -1, -1,
+                                        -1, -1, 20,  -1, -1, -1,  -1, -1,
+                                        -1, -1, 100, -1, -1, 100, -1};
 int rowcnt;
 #define SEQUENCE(stream, query) permutation[stream % MAX_PERMUTE][query - 1]
 #else
