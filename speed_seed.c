@@ -203,7 +203,8 @@ static RND RND_ModMult(RND nA, RND nB)
 /* updates Seed[column] using the a_rnd algorithm */
 void fake_a_rnd(int min, int max, int column) {
   long len, itcount;
-  RANDOM(len, (long)min, (long)max, (long)column);
+  // RANDOM(len, (long)min, (long)max, (long)column);
+  len = UnifInt((long)min, (long)max, (long)column);
   if (len % 5L == 0)
     itcount = len / 5;
   else

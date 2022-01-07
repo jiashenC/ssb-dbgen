@@ -22,6 +22,11 @@
 #define L_SKEY_MIN 1
 #define L_SKEY_MAX (tdefs[SUPP].base * scale)
 
+/*zipf only*/
+#define L_LCNT_MAX (tdefs[LINE].base * scale)
+#define L_LINE_SIZE (4 * L_LCNT_MAX)
+#define O_OKEY_MAX (long)(tdefs[ORDER].base * scale)
+
 #endif
 
 #ifdef TPCH
@@ -118,7 +123,12 @@ static char lnoise[4] = {'|', '/', '-', '\\'};
 #define MK_SPARSE(key, seq)                                                    \
   (((((key >> 3) << 2) | (seq & 0x0003)) << 3) | (key & 0x0007))
 
-#define RANDOM(tgt, lower, upper, stream) dss_random(&tgt, lower, upper, stream)
+#define RANDOM(tgt, lower, upper, stream, skew, n)                             \
+  if (skew == 0)                                                               \
+    dss_random(&tgt, lower, upper, stream);                                    \
+  else                                                                         \
+    tgt = SkewInt((long)upper, (long)lower, (long)stream, skew, n);
+
 #ifdef SSBM
 typedef struct {
   char *name;
@@ -273,6 +283,9 @@ EXTERN int delete_segments;
 EXTERN int insert_orders_segment;
 EXTERN int insert_lineitem_segment;
 EXTERN int delete_segment;
+
+// zipf
+EXTERN double skew;
 
 #ifndef DECLARER
 extern tdef tdefs[];
@@ -598,5 +611,7 @@ int dbg_print(int dt, FILE *tgt, void *data, int len, int eol);
 #define BBB_TYPE_SD 45
 #define BBB_CMNT_SD 46
 #define BBB_OFFSET_SD 47
+// zipf
+#define L_OKEY_SD 48
 
 #endif /* DSS_H */

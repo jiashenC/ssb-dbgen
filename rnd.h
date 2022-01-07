@@ -4,6 +4,7 @@
  * rnd.h -- header file for use withthe portable random number generator
  * provided by Frank Stephens of Unisys
  */
+#include "dss.h"
 
 /* function protypes */
 long NextRand PROTO((long));
@@ -78,3 +79,26 @@ seed_t Seed[MAX_STREAM + 1] = {
     {SUPP, 202794285, 0, 1},                             /* BBB comment  46 */
     {SUPP, 715851524, 0, 1}                              /* BBB junk     47 */
 };
+
+/*
+ *  Extensions to dbgen for generation of skewed data.
+ *	Surajit Chaudhuri, Vivek Narasayya.
+ *  (Jan '99)
+ */
+
+/*
+ *  For Zipfian distribution, we need to know:
+ *  (a) what the current value being generated for this column is
+ *  (b) how many distinct values have been generated so far for this column
+ *  (c) how many copies of the current value must be generated.
+ *  (d) how many copies of the current value have been generated thus far.
+ *	(e) skew value being used for a column (only if user chose mixed distr.)
+ *  (f) multiplier for each stream.
+ * (note: Global, hence initialized to 0)
+ */
+long CurrentValue[MAX_STREAM + 1];
+long NumDistinctValuesGenerated[MAX_STREAM + 1];
+long CurrentValueTarget[MAX_STREAM + 1];
+long CurrentValueCounter[MAX_STREAM + 1];
+double ColumnSkewValue[MAX_STREAM + 1];
+double Multiplier[MAX_STREAM + 1];

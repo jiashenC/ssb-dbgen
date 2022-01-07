@@ -19,6 +19,8 @@
 #include <stdio.h>
 
 char *env_config PROTO((char *tag, char *dflt));
+#define PI (3.141597)
+
 void NthElement(long, long *);
 
 void dss_random(long *tgt, long lower, long upper, long stream) {
@@ -237,4 +239,277 @@ double Exponential(double dMean, long nStream)
   Seed[nStream].value = NextRand(Seed[nStream].value);
   dTemp = (double)Seed[nStream].value / dM; /* unif between 0..1 */
   return (-dMean * log(1.0 - dTemp));
+}
+
+/*
+ *  Extensions to dbgen for generation of skewed data.
+ *	Surajit Chaudhuri, Vivek Narasayya.
+ *  (Jan '99)
+ */
+
+#define EPSILON (0.0001)
+
+/*
+ * Round the number x to the nearest integer.
+ */
+double round(double x) {
+  double fx = floor(x);
+  double cx = ceil(x);
+
+  if ((x - fx) <= (cx - x))
+    return fx;
+  else
+    return cx;
+}
+
+/*
+ * Perform binary search to find D (number of distinct values for given n, zipf)
+ *
+ */
+double SolveForMultipler(long n, double zipf) {
+  long lowD = 1;
+  long highD = n;
+  long mid;
+  double sumMult;
+  double nRowsPrime;
+  long numRows;
+  long i;
+
+  while ((highD - lowD) > 1) {
+    mid = (highD + lowD) / 2;
+    sumMult = 0.0;
+
+    /* compute multiplier */
+    for (i = 1; i <= mid; i++) {
+      sumMult += 1.0 / (pow((double)i, zipf));
+    }
+
+    /* compute number of rows generated for this mulitpler */
+    numRows = 0;
+    for (i = 1; i <= mid; i++) {
+      nRowsPrime = ((n / sumMult) / pow((double)i, zipf));
+      numRows += (long)round(nRowsPrime);
+    }
+    if (((double)(n - numRows)) / n < EPSILON) {
+      break;
+    }
+
+    if (numRows > n) {
+      /* we overestimated numRows -- we need fewer distinct values */
+      highD = mid;
+    } else {
+      /* underestimation of numRows -- need lower multiplier */
+      lowD = mid;
+    }
+  }
+  return sumMult;
+}
+
+double GetMultiplier(long n, double zipf) {
+  double multiplier;
+  double term;
+  long i;
+
+  if (zipf == 0.0)
+    multiplier = n;
+  else if (zipf == 1.0)
+    multiplier = log(n) + 0.577;
+  else if (zipf == 2.0)
+    multiplier = (PI * PI) / 6.0;
+  else if (zipf == 3.0)
+    multiplier = 1.202;
+  else if (zipf == 4.0)
+    multiplier = (PI * PI * PI * PI) / 90.0;
+  else {
+
+    /* compute multiplier (must be within given bounds) */
+    multiplier = 0;
+    for (i = 1; i <= n; i++) {
+      term = 1.0 / pow((double)i, zipf);
+      multiplier += term;
+
+      /* if later terms add very little we can stop */
+      if (term < EPSILON)
+        break;
+    }
+  }
+  return multiplier;
+}
+
+/******************************************************************%
+
+   RANDOM:  Yields a random number from a Zipfian distribution with
+   a specified skewVal. Skew is an integer in the range 0..3
+
+*******************************************************************/
+
+/*
+ *
+ */
+long SkewInt(long nLow, long nHigh, long nStream, double skewVal, long n)
+/*
+ *
+ */
+{
+  double zipf;
+  double dRange;
+  long nTemp;
+  double multiplier;
+  double Czn;
+  long numDistinctValuesGenerated;
+
+  /* check for validity of skewVal */
+  if (skewVal < 0 || skewVal > 5)
+    zipf = 0; /* assume uniform */
+  else if (skewVal == 5.0) {
+    /* special case */
+    /* check if any values have been generated for this column */
+    if (NumDistinctValuesGenerated[nStream] == 0) {
+      /* pick a skew value to be used for this column*/
+      zipf = (int)UnifInt(0, 4, 0);
+      ColumnSkewValue[nStream] = zipf;
+    } else {
+      /* column skew value has been initialized before */
+      zipf = ColumnSkewValue[nStream];
+    }
+  } else {
+    /* skewVal is between 0 and 4 */
+    zipf = skewVal;
+  }
+
+  /* If no values have been generated for this stream as yet, get multiplier */
+  if (NumDistinctValuesGenerated[nStream] == 0) {
+    Multiplier[nStream] = GetMultiplier(n, zipf);
+  }
+  multiplier = Multiplier[nStream];
+
+  /*
+   * Check how many copies of the current value
+   * have already been generated for this stream.
+   * If we have generated enough, proceed to
+   * next value, and decide how many copies of
+   * this value should be generated.
+   */
+
+  if (CurrentValueCounter[nStream] == CurrentValueTarget[nStream]) {
+    /* proceed to next value */
+    if (nStream < 0 || nStream > MAX_STREAM)
+      nStream = 0;
+    if (nLow == nHigh)
+      nTemp = nLow;
+    else {
+      if (nLow > nHigh) {
+        nTemp = nLow;
+        nLow = nHigh;
+        nHigh = nTemp;
+      }
+      dRange = (double)(nHigh - nLow + 1);
+      Seed[nStream].value = NextRand(Seed[nStream].value);
+      nTemp = (long)(((double)Seed[nStream].value / dM) * (dRange));
+      nTemp += nLow;
+      CurrentValue[nStream] = nTemp;
+    }
+  } else {
+    /* return another copy of current value */
+    nTemp = CurrentValue[nStream];
+    CurrentValueCounter[nStream]++;
+    return nTemp;
+  }
+
+  /*
+   * check how many distinct values for this column
+   * have already been generated.
+   */
+  numDistinctValuesGenerated = NumDistinctValuesGenerated[nStream] + 1;
+
+  if (n < 1)
+    n = (nHigh - nLow + 1);
+
+  /*
+  * zipf is guaranteed to be in the range 0..4
+  * pick the multiplier
+  if(zipf == 0)
+          multiplier = n;
+  else if(zipf==1)
+          multiplier = log(n) + 0.577 ;
+  else if(zipf==2)
+          multiplier = (PI*PI)/6.0;
+  else if(zipf==3)
+          multiplier = 1.202;
+  else if(zipf==4)
+          multiplier = (PI*PI*PI*PI)/90.0;
+  */
+
+  Czn = n / multiplier;
+  CurrentValueTarget[nStream] =
+      (long)(Czn / pow((double)numDistinctValuesGenerated, zipf));
+  /* ensure that there is at least one value*/
+  CurrentValueTarget[nStream] =
+      (CurrentValueTarget[nStream] < 1) ? 1 : CurrentValueTarget[nStream];
+  CurrentValueCounter[nStream] = 1;
+  NumDistinctValuesGenerated[nStream]++;
+
+  return nTemp;
+}
+
+/******************************************************************%
+
+   Returns the number of copies of the next value
+   in the given distribution. Skew is an integer in the range 0..4
+
+*******************************************************************/
+/*
+ *
+ */
+long SkewIntCount(long nStream, double skewVal, long n)
+/*
+ *
+ */
+{
+  double zipf;
+  double multiplier;
+  double Czn;
+  long numDistinctValuesGenerated;
+  long numCopies;
+
+  /* check for validity of skewVal */
+  if (skewVal < 0 || skewVal > 4)
+    zipf = 0; /* assume uniform */
+  else if (skewVal == 5.0) {
+    /* column skew value has been initialized before */
+    zipf = ColumnSkewValue[nStream];
+  } else {
+    /* skewVal is between 0 and 4 */
+    zipf = skewVal;
+  }
+
+  /*
+   * check how many distinct values for this column
+   * have already been generated.
+   */
+  numDistinctValuesGenerated = NumDistinctValuesGenerated[nStream] + 1;
+
+  multiplier = Multiplier[nStream];
+  /*
+  * zipf is guaranteed to be in the range 0..4
+  * pick the multiplier
+  if(zipf == 0)
+          multiplier = n;
+  else if(zipf==1)
+          multiplier = log(n) + 0.577 ;
+  else if(zipf==2)
+          multiplier = (PI*PI)/6.0;
+  else if(zipf==3)
+          multiplier = 1.202;
+  else if(zipf==4)
+          multiplier = (PI*PI*PI*PI)/90.0;
+  */
+
+  Czn = n / multiplier;
+  numCopies = (long)(Czn / pow((double)numDistinctValuesGenerated, zipf));
+  /* ensure that there is at least one value*/
+  CurrentValueTarget[nStream] =
+      (CurrentValueTarget[nStream] < 1) ? 1 : CurrentValueTarget[nStream];
+  NumDistinctValuesGenerated[nStream]++;
+  return numCopies;
 }

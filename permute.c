@@ -76,7 +76,8 @@ long *permute(long *a, int c, long s) {
     for (i = 0; i < c; i++)
       *(a + i) = i;
     for (i = 0; i < c; i++) {
-      RANDOM(source, 0L, (long)(c - 1), s);
+      // RANDOM(source, 0L, (long)(c - 1), s);
+      source = UnifInt(0L, (long)(c - 1), s);
       temp = *(a + source);
       *(a + source) = *(a + i);
       *(a + i) = temp;

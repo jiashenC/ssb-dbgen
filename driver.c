@@ -79,6 +79,14 @@ char *spawn_args[25];
 #endif
 
 /*
+ *  Extensions to dbgen for generation of skewed data.
+ *	Surajit Chaudhuri, Vivek Narasayya.
+ *  (Jan '99)
+ */
+/* default skew is 0 -- i.e. uniform distribution */
+double skew = 0;
+
+/*
 * general table descriptions. See dss.h for details on structure
 * NOTE: tables with no scaling info are scaled according to
 * another table
@@ -646,6 +654,7 @@ void usage(void) {
 
   fprintf(stderr, "-U <s> -- generate <s> update sets\n");
   fprintf(stderr, "-v     -- enable VERBOSE mode\n");
+  fprintf(stderr, "-z     -- generate skewed data distributions\n");
   fprintf(
       stderr,
       "\nTo generate the SF=1 (1GB), validation database population, use:\n");
@@ -744,7 +753,7 @@ int pload(int tbl) {
 void process_options(int count, char **vector) {
   int option;
 
-  while ((option = getopt(count, vector, "b:C:Dd:Ffi:hn:O:P:qr:s:S:T:U:v")) !=
+  while ((option = getopt(count, vector, "b:C:Dd:Ffi:hn:O:P:qr:s:S:T:U:vz:")) !=
          -1)
     switch (option) {
     case 'b': /* load distributions from named file */
@@ -766,6 +775,12 @@ void process_options(int count, char **vector) {
       break;
     case 'v': /* life noises enabled */
       verbose = 1;
+      break;
+    // zipf
+    case 'z': /* for all columns use specified skew parameter */
+      skew = atof(optarg);
+      if (skew == -1.0)
+        skew = 5;
       break;
     case 'f': /* blind overwrites; Force */
       force = 1;
@@ -1077,7 +1092,8 @@ int main(int ac, char **av) {
     }
 
   /*
-* traverse the tables, invoking the appropriate data generation routine for any to
+* traverse the tables, invoking the appropriate data generation routine for any
+* to
 * be built
 */
   for (i = PART; i <= REGION; i++)

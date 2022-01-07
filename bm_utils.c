@@ -95,6 +95,11 @@ void usage();
 long *permute_dist(distribution *d, long stream);
 extern long Seed[];
 
+// zipf
+extern long Seed[];
+extern double skew;
+extern long SkewInt(long nLow, long nHigh, long nStream, double skew, long n);
+
 /*
  * env_config: look for a environmental variable setting and return its
  * value; otherwise return the default supplied
@@ -146,10 +151,10 @@ long yes_no(char *prompt) {
 int a_rnd(int min, int max, int column, char *dest) {
   long i, len, char_int;
 
-  RANDOM(len, min, max, column);
+  RANDOM(len, min, max, column, skew, (max - min + 1));
   for (i = 0; i < len; i++) {
     if (i % 5 == 0)
-      RANDOM(char_int, 0, MAX_LONG, column);
+      RANDOM(char_int, 0, MAX_LONG, column, 0, (MAX_LONG));
     *(dest + i) = alpha_num[char_int & 077];
     char_int >>= 6;
   }
@@ -170,7 +175,7 @@ void e_str(distribution *d, int min, int max, int stream, char *dest) {
   a_rnd(min, max, stream, dest);
   pick_str(d, stream, strtmp);
   len = strlen(strtmp);
-  RANDOM(loc, 0, (strlen(dest) - 1 - len), stream);
+  RANDOM(loc, 0, (strlen(dest) - 1 - len), stream, skew, (strlen(dest) - len));
   strncpy(dest + loc, strtmp, len);
 
   return;
@@ -185,7 +190,8 @@ int pick_str(distribution *s, int c, char *target) {
   long i = 0;
   long j;
 
-  RANDOM(j, 1, s->list[s->count - 1].weight, c);
+  RANDOM(j, 1, s->list[s->count - 1].weight, c, skew,
+         s->list[s->count - 1].weight);
   while (s->list[i].weight < j)
     i++;
   strcpy(target, s->list[i].text);

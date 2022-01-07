@@ -231,7 +231,8 @@ int dbg_text(char *tgt, int min, int max, int sd) {
   int wordlen = 0, needed, s_len;
   char sentence[MAX_SENT_LEN + 1];
 
-  RANDOM(length, min, max, sd);
+  // RANDOM(length, min, max, sd);
+  length = UnifInt(min, max, sd);
 
   while (wordlen < length) {
     s_len = txt_sentence(sentence, sd);
