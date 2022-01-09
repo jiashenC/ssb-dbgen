@@ -212,6 +212,7 @@ long mk_order(long index, order_t *o, long upd_num) {
   mk_sparse(index, o->okey,
             (upd_num == 0) ? 0 : 1 + upd_num / (10000 / refresh));
 
+  // original version
   // RANDOM(o->custkey, O_CKEY_MIN, O_CKEY_MAX, O_CKEY_SD);
   // while (o->custkey % CUST_MORTALITY == 0) {
   //   o->custkey += delta;
@@ -219,9 +220,19 @@ long mk_order(long index, order_t *o, long upd_num) {
   //   delta *= -1;
   // }
 
-  do {
-    RANDOM(o->custkey, O_CKEY_MIN, O_CKEY_MAX, O_CKEY_SD, skew, O_CKEY_MAX);
-  } while (o->custkey % CUST_MORTALITY == 0);
+  // tpch version zipf
+  // do {
+  // RANDOM(o->custkey, O_CKEY_MIN, O_CKEY_MAX, O_CKEY_SD, skew, O_CKEY_MAX);
+  // } while (o->custkey % CUST_MORTALITY == 0);
+
+  // borrow from newer Srikanth zipf
+  RANDOM(o->custkey, O_CKEY_MIN, O_CKEY_MAX, O_CKEY_SD, skew, O_CKEY_MAX);
+  while (o->custkey % CUST_MORTALITY == 0) {
+    o->custkey += delta;
+    o->custkey = MIN(o->custkey, O_CKEY_MAX);
+    delta *= -1;
+  }
+
   pick_str(&o_priority_set, O_PRIO_SD, o->opriority);
   RANDOM(clk_num, 1, MAX((scale * O_CLRK_SCL), O_CLRK_SCL), O_CLRK_SD, skew,
          O_OKEY_MAX);
