@@ -508,7 +508,8 @@ extern tdef tdefs[];
 
 /******* output macros ********/
 #ifndef SEPARATOR
-#define SEPARATOR ',' /* field spearator for generated flat files */
+// #define SEPARATOR ',' /* field spearator for generated flat files */
+#define SEPARATOR '|' /* field spearator for generated flat files */
 #endif
 /* Data type flags for a single print routine */
 #define DT_STR 0
