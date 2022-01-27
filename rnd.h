@@ -77,7 +77,8 @@ seed_t Seed[MAX_STREAM + 1] = {
     {SUPP, 263032577, 0, 1},                             /* BBB offset   44 */
     {SUPP, 753643799, 0, 1},                             /* BBB type     45 */
     {SUPP, 202794285, 0, 1},                             /* BBB comment  46 */
-    {SUPP, 715851524, 0, 1}                              /* BBB junk     47 */
+    {SUPP, 715851524, 0, 1},                             /* BBB junk     47 */
+    {LINE, 2095021727, 0, 1}                             /* L_OKEY_SD    48 */
 };
 
 /*

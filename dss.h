@@ -431,7 +431,7 @@ extern tdef tdefs[];
 #define ENDDATE 98365
 #define TOTDATE 2557
 #define UPD_PCT 10
-#define MAX_STREAM 47
+#define MAX_STREAM 48
 #define V_STR_LOW 0.4
 #define PENNIES 100 /* for scaled int money arithmetic */
 #define Q11_FRACTION (double)0.0001
