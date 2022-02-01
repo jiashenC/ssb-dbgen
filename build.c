@@ -47,11 +47,11 @@ static void gen_phone PROTO((long ind, char *target, long seed));
 
 #ifdef SSBM
 static void gen_category PROTO((char *target, long seed));
-int gen_city PROTO((char *cityName, char *nationName));
+int gen_city PROTO((char *cityName, char *nationName, long sd, long len));
 int gen_season PROTO((char *dest, int month, int day));
 int is_last_day_in_month PROTO((int year, int month, int day));
 int gen_holiday_fl PROTO((char *dest, int month, int day));
-int gen_city PROTO((char *cityName, char *nationName));
+// int gen_city PROTO((char *cityName, char *nationName, long sd));
 int gen_color PROTO((char *source, char *dest));
 #endif
 
@@ -97,7 +97,7 @@ long mk_cust(long n_cust, customer_t *c) {
   RANDOM(i, 0, nations.count - 1, C_NTRG_SD, skew, O_CKEY_MAX);
   strcpy(c->nation_name, nations.list[i].text);
   strcpy(c->region_name, regions.list[nations.list[i].weight].text);
-  gen_city(c->city, c->nation_name);
+  gen_city(c->city, c->nation_name, C_CITY_SD, O_CKEY_MAX);
   gen_phone(i, c->phone, (long)C_PHNE_SD);
   pick_str(&c_mseg_set, C_MSEG_SD, c->mktsegment);
   return (0);
@@ -275,7 +275,7 @@ long mk_order(long index, order_t *o, long upd_num) {
     o->lines = count;
     for (lcnt = 0; lcnt < o->lines; lcnt++) {
       HUGE_SET(o->okey, o->lineorders[lcnt].okey);
-      o->lineorders[lcnt].linenumber = lcnt + 1;
+      o->lineorders[lcnt].linenumber = (i * O_LCNT_MAX) + lcnt + 1;
       o->lineorders[lcnt].custkey = o->custkey;
       RANDOM(o->lineorders[lcnt].partkey, L_PKEY_MIN, L_PKEY_MAX, L_PKEY_SD,
              skew, L_LINE_SIZE);
@@ -486,7 +486,7 @@ long mk_supp(long index, supplier_t *s) {
   RANDOM(i, 0, nations.count - 1, S_NTRG_SD, skew, L_SKEY_MAX);
   strcpy(s->nation_name, nations.list[i].text);
   strcpy(s->region_name, regions.list[nations.list[i].weight].text);
-  gen_city(s->city, s->nation_name);
+  gen_city(s->city, s->nation_name, S_CITY_SD, L_SKEY_MAX);
   gen_phone(i, s->phone, (long)C_PHNE_SD);
   return (0);
 }
@@ -575,7 +575,7 @@ int mk_region(long index, code_t *c) {
 
 #ifdef SSBM
 /*bug!*/
-int gen_city(char *cityName, char *nationName) {
+int gen_city(char *cityName, char *nationName, long sd, long len) {
   int i = 0;
   long randomPick;
   int clen = strlen(cityName);
@@ -587,7 +587,8 @@ int gen_city(char *cityName, char *nationName) {
     for (i = nlen; i < CITY_FIX - 1; i++)
       cityName[i] = ' ';
   }
-  RANDOM(randomPick, 0, 9, 98, skew, 10);
+  // RANDOM(randomPick, 0, 9, 98, skew, 10);
+  RANDOM(randomPick, 0, 9, sd, skew, len);
 
   sprintf(cityName + CITY_FIX - 1, "%d", randomPick);
   cityName[CITY_FIX] = '\0';

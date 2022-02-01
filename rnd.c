@@ -377,6 +377,9 @@ long SkewInt(long nLow, long nHigh, long nStream, double skewVal, long n)
     zipf = skewVal;
   }
 
+  if (nStream < 0 || nStream > MAX_STREAM)
+    printf("OOB SD %d!!\n", nStream);
+
   /* If no values have been generated for this stream as yet, get multiplier */
   if (NumDistinctValuesGenerated[nStream] == 0) {
     Multiplier[nStream] = GetMultiplier(n, zipf);

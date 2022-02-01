@@ -25,7 +25,7 @@
 /*zipf only*/
 #define L_LCNT_MAX (tdefs[LINE].base * scale)
 #define L_LINE_SIZE (4 * L_LCNT_MAX)
-#define O_OKEY_MAX (long)(tdefs[ORDER].base * scale)
+#define O_OKEY_MAX ((long)(tdefs[LINE].base * scale))
 
 #endif
 
@@ -396,7 +396,8 @@ extern tdef tdefs[];
 
 #ifdef SSBM
 /*part table log based*/
-#define L_PKEY_MAX (tdefs[PART].base * (floor(log((double)scale)) + 1))
+#define L_PKEY_MAX ((long)(tdefs[PART].base * (floor(log((double)scale)) + 1)))
+// #define L_PKEY_MAX (floor(log((double)scale)) + 1)
 #else
 #define L_PKEY_MAX (tdefs[PART].base * scale)
 #endif
@@ -431,7 +432,7 @@ extern tdef tdefs[];
 #define ENDDATE 98365
 #define TOTDATE 2557
 #define UPD_PCT 10
-#define MAX_STREAM 48
+#define MAX_STREAM 53
 #define V_STR_LOW 0.4
 #define PENNIES 100 /* for scaled int money arithmetic */
 #define Q11_FRACTION (double)0.0001
@@ -578,10 +579,16 @@ int dbg_print(int dt, FILE *tgt, void *data, int len, int eol);
 #define P_SIZE_SD 3
 #define P_CNTR_SD 4
 #define P_RCST_SD 5
+// seed moved here for zipf distrubtions
+#define P_CMNT_SD 6
 #define PS_QTY_SD 7
 #define PS_SCST_SD 8
+// seed moved here for zipf distrubtions
+#define PS_CMNT_SD 9
 #define O_SUPP_SD 10
 #define O_CLRK_SD 11
+// seed moved here for zipf distrubtions
+#define O_CMNT_SD 12
 #define O_ODATE_SD 13
 #define L_QTY_SD 14
 #define L_DCNT_SD 15
@@ -594,13 +601,23 @@ int dbg_print(int dt, FILE *tgt, void *data, int len, int eol);
 #define L_CDTE_SD 22
 #define L_RDTE_SD 23
 #define L_RFLG_SD 24
+// seed moved here for zipf distrubtions
+#define L_CMNT_SD 25
+// seed moved here for zipf distrubtions
+#define C_ADDR_SD 26
 #define C_NTRG_SD 27
 #define C_PHNE_SD 28
 #define C_ABAL_SD 29
 #define C_MSEG_SD 30
+// seed moved here for zipf distrubtions
+#define C_CMNT_SD 31
+// seed moved here for zipf distrubtions
+#define S_ADDR_SD 32
 #define S_NTRG_SD 33
 #define S_PHNE_SD 34
 #define S_ABAL_SD 35
+// seed moved here for zipf distrubtions
+#define S_CMNT_SD 36
 #define P_NAME_SD 37
 #define O_PRIO_SD 38
 #define HVAR_SD 39
@@ -612,7 +629,13 @@ int dbg_print(int dt, FILE *tgt, void *data, int len, int eol);
 #define BBB_TYPE_SD 45
 #define BBB_CMNT_SD 46
 #define BBB_OFFSET_SD 47
-// zipf
+// seeds moved here for zipf distributions (all onward)
 #define L_OKEY_SD 48
+#define P_CAT_SD 49
+#define C_NAT_SD 50
+#define C_REG_SD 51
+// newly added by me for zipf distributions
+#define C_CITY_SD 52
+#define S_CITY_SD 53
 
 #endif /* DSS_H */

@@ -18,13 +18,13 @@
 #define P_CAT_LEN 7
 #define P_CAT_MIN 1
 #define P_CAT_MAX 5
-#define P_CAT_SD 97
+// #define P_CAT_SD 97
 #define S_NATION_NAME_LEN 15
 #define S_REGION_NAME_LEN 12
 #define C_NATION_NAME_LEN 15
 #define C_REGION_NAME_LEN 12
-#define C_NAT_SD 16
-#define C_REG_SD 3
+// #define C_NAT_SD 16
+// #define C_REG_SD 3
 #define O_SHIP_STRU_LEN 25
 #define O_SHIP_MODE_LEN 10
 #define O_SHIP_PRIO_LEN 1
@@ -124,11 +124,11 @@
 
 #endif
 
-#define P_CMNT_SD 6
-#define PS_CMNT_SD 9
-#define O_CMNT_SD 12
-#define C_ADDR_SD 26
-#define C_CMNT_SD 31
-#define S_ADDR_SD 32
-#define S_CMNT_SD 36
-#define L_CMNT_SD 25
+// #define P_CMNT_SD 6
+// #define PS_CMNT_SD 9
+// #define O_CMNT_SD 12
+// #define C_ADDR_SD 26
+// #define C_CMNT_SD 31
+// #define S_ADDR_SD 32
+// #define S_CMNT_SD 36
+// #define L_CMNT_SD 25
