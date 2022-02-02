@@ -396,7 +396,7 @@ extern tdef tdefs[];
 
 #ifdef SSBM
 /*part table log based*/
-#define L_PKEY_MAX ((long)(tdefs[PART].base * (floor(log((double)scale)) + 1)))
+#define L_PKEY_MAX ((long)(tdefs[PART].base * (floor(log2((double)scale)) + 1)))
 // #define L_PKEY_MAX (floor(log((double)scale)) + 1)
 #else
 #define L_PKEY_MAX (tdefs[PART].base * scale)
