@@ -342,7 +342,7 @@ FILE *tbl_open(int tbl, char *mode) {
   }
 
   if (S_ISFIFO(fstats.st_mode)) {
-    retcode = open(fullpath, ((*mode == 'r') ? O_RDONLY : O_WRONLY) | O_CREAT);
+    retcode = open(fullpath, ((*mode == 'r') ? O_RDONLY : O_WRONLY) | O_CREAT, O_CREAT);
     f = fdopen(retcode, mode);
   } else {
 
