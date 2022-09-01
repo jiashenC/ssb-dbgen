@@ -244,9 +244,9 @@ long julian(long date) {
 }
 
 /*
-* load a distribution from a flat file into the target structure;
-* should be rewritten to allow multiple dists in a file
-*/
+ * load a distribution from a flat file into the target structure;
+ * should be rewritten to allow multiple dists in a file
+ */
 void read_dist(char *path, char *name, distribution *target) {
   FILE *fp;
   char line[256], token[256], *c;
@@ -342,7 +342,8 @@ FILE *tbl_open(int tbl, char *mode) {
   }
 
   if (S_ISFIFO(fstats.st_mode)) {
-    retcode = open(fullpath, ((*mode == 'r') ? O_RDONLY : O_WRONLY) | O_CREAT, O_CREAT);
+    retcode =
+        open(fullpath, ((*mode == 'r') ? O_RDONLY : O_WRONLY) | O_CREAT, 0644);
     f = fdopen(retcode, mode);
   } else {
 
@@ -351,9 +352,9 @@ FILE *tbl_open(int tbl, char *mode) {
     /*use open to first to get the in fd and apply regular fdopen*/
 
     /*cheng: Betty mentioned about write mode problem here, added 066*/
-    retcode = open(fullpath, ((*mode == 'r') ? O_RDONLY : O_WRONLY) | O_CREAT |
-                                 O_LARGEFILE,
-                   0644);
+    retcode = open(
+        fullpath,
+        ((*mode == 'r') ? O_RDONLY : O_WRONLY) | O_CREAT | O_LARGEFILE, 0644);
     f = fdopen(retcode, mode);
 #else
     f = fopen(fullpath, mode);
